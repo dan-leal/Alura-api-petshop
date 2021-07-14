@@ -1,37 +1,58 @@
-const express = require('express')
-const app = express()
-const config = require('config')
-const NaoEncontrado = require('./erros/NaoEncontrado')
-const CampoInvalido = require('./erros/CampoInvalido')
-const DadosNaoFornecidos = require('./erros/DadosNaoFornecidos')
-const ValorNaoSuportado = require('./erros/ValorNaoSuportado')
+const express = require("express");
+const app = express();
+const config = require("config");
+const NaoEncontrado = require("./erros/NaoEncontrado");
+const CampoInvalido = require("./erros/CampoInvalido");
+const DadosNaoFornecidos = require("./erros/DadosNaoFornecidos");
+const ValorNaoSuportado = require("./erros/ValorNaoSuportado");
+const FormatosAceitos = require("./Serializador").formatosAceitos;
 
-app.use(express.json())
+app.use(express.json());
 
-const roteador = require('./rotas/fornecedores')
+app.use((req, res, proximo) => {
+    let formatoRequisitado = req.header("Accept");
 
-app.use('/api/fornecedores', roteador)
+    if (formatoRequisitado === "*/*") {
+        formatoRequisitado = "application/json";
+    }
+
+    if (formatosAceitos.indexOf(formatoRequisitado) === -1) {
+        res.status(406);
+        res.end();
+        return;
+    }
+
+    res.setHeader("Content-Type", formatoRequisitado);
+    proximo();
+});
+
+const roteador = require("./rotas/fornecedores");
+const { formatosAceitos } = require("./Serializador");
+
+app.use("/api/fornecedores", roteador);
 
 app.use((erro, req, res, proximo) => {
-    let status = 500
-    if(erro instanceof NaoEncontrado){
-        status = 404
+    let status = 500;
+    if (erro instanceof NaoEncontrado) {
+        status = 404;
     }
-    if(erro instanceof CampoInvalido || erro instanceof DadosNaoFornecidos){
-        status = 400
-    }
-
-    if(erro instanceof ValorNaoSuportado){
-        status = 406
+    if (erro instanceof CampoInvalido || erro instanceof DadosNaoFornecidos) {
+        status = 400;
     }
 
-    res.status(status)
+    if (erro instanceof ValorNaoSuportado) {
+        status = 406;
+    }
+
+    res.status(status);
     res.send(
-        JSON.stringify({ 
+        JSON.stringify({
             mensagem: erro.message,
-            id: erro.idErro
+            id: erro.idErro,
         })
-    )
-})
+    );
+});
 
-app.listen(config.get('api.porta'), ()=> console.log('A Api está funcionando!'))
+app.listen(config.get("api.porta"), () =>
+    console.log("A Api está funcionando!")
+);
