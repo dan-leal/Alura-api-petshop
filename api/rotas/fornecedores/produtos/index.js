@@ -32,4 +32,19 @@ roteador.delete("/:id", async (req, res) => {
     res.status(204).end();
 });
 
+roteador.get("/:id", async (req, res, proximo) => {
+    try {
+        const dados = {
+            id: req.params.id,
+            fornecedor: req.fornecedor.id,
+        };
+
+        const produto = new Produto(dados);
+        await produto.carregar();
+        res.send(JSON.stringify(produto));
+    } catch (erro) {
+        proximo(erro);
+    }
+});
+
 module.exports = roteador;
