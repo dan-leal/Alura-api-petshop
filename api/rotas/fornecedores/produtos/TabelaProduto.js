@@ -6,6 +6,7 @@ module.exports = {
             where: {
                 fornecedor: idFornecedor,
             },
+            raw: true,
         });
     },
     inserir(dados) {
