@@ -1,4 +1,5 @@
 const Modelo = require("./modeloTabelaProduto");
+const instancia = require("../../../banco-de-dados");
 
 module.exports = {
     listar(idFornecedor) {
@@ -9,9 +10,11 @@ module.exports = {
             raw: true,
         });
     },
+
     inserir(dados) {
         return Modelo.create(dados);
     },
+
     remover(idProduto, idFornecedor) {
         return Modelo.destroy({
             where: {
@@ -20,6 +23,7 @@ module.exports = {
             },
         });
     },
+
     async pegarPorId(idProduto, idFornecedor) {
         const encontrado = await Modelo.findOne({
             where: {
@@ -38,5 +42,20 @@ module.exports = {
 
     atualizar(dadosDoProduto, dadosParaAtualizar) {
         return Modelo.update(dadosParaAtualizar, { where: dadosDoProduto });
+    },
+
+    async subtrair(idProduto, idFornecedor, campo, quantidade) {
+        return instancia.transaction(async (transacao) => {
+            const produto = await Modelo.findOne({
+                where: {
+                    id: idProduto,
+                    fornecedor: idFornecedor,
+                },
+            });
+
+            produto[campo] = quantidade;
+            await produto.save();
+            return produto;
+        });
     },
 };
