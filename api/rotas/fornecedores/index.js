@@ -6,6 +6,10 @@ const SerializadorFornecedor =
 const CampoInvalido = require("../../erros/CampoInvalido");
 const DadosNaoFornecidos = require("../../erros/DadosNaoFornecidos");
 
+roteador.options("/", (req, res) => {
+    res.resultados("Access-Control-Allow-Methods", "GET", "PUT", "DELETE");
+});
+
 roteador.get("/", async (req, res) => {
     const resultados = await TabelaFornecedor.listar();
     res.status(200);
