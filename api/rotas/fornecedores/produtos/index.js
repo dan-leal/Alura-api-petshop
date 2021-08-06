@@ -18,6 +18,13 @@ roteador.post("/", async (req, res, proximo) => {
         const produto = new Produto(dados);
         await produto.criar();
         const serializador = new Serializador(res.getHeader("Content-Type"));
+        res.set("Etag", produto.versao);
+        const timestamp = new Date(produto.dataAtualizacao).getTime();
+        res.set("Last-Modified", timestamp);
+        res.set(
+            "Location",
+            `/api/fornecedores/${produto.fornecedor}/produtos/${produto.id}`
+        );
         res.status(201);
         res.send(serializador.serializar(produto));
     } catch (erro) {
@@ -54,7 +61,28 @@ roteador.get("/:id", async (req, res, proximo) => {
             "dataAtualizacao",
             "versao",
         ]);
+        res.set("Etag", produto.versao);
+        const timestamp = new Date(produto.dataAtualizacao).getTime();
+        res.set("Last-Modified", timestamp);
         res.send(serializador.serializar(produto));
+    } catch (erro) {
+        proximo(erro);
+    }
+});
+
+roteador.head("/:id", async (req, res, proximo) => {
+    try {
+        const dados = {
+            id: req.params.id,
+            fornecedor: req.fornecedor.id,
+        };
+
+        const produto = new Produto(dados);
+        await produto.carregar();
+        res.set("Etag", produto.versao);
+        const timestamp = new Date(produto.dataAtualizacao).getTime();
+        res.set("Last-Modified", timestamp);
+        res.status(200).end();
     } catch (erro) {
         proximo(erro);
     }
@@ -68,6 +96,10 @@ roteador.put("/:id", async (req, res, proximo) => {
         });
         const produto = new Produto(dados);
         await produto.atualizar();
+        await produto.carregar();
+        res.set("Etag", produto.versao);
+        const timestamp = new Date(produto.dataAtualizacao).getTime();
+        res.set("Last-Modified", timestamp);
         res.status(204).end();
     } catch (erro) {
         proximo(erro);
@@ -83,6 +115,10 @@ roteador.post("/:id/diminuir-estoque", async (req, res, proximo) => {
         await produto.carregar();
         produto.estoque = produto.estoque - req.body.quantidade;
         await produto.diminuirEstoque();
+        await produto.carregar();
+        res.set("Etag", produto.versao);
+        const timestamp = new Date(produto.dataAtualizacao).getTime();
+        res.set("Last-Modified", timestamp);
         res.status(204).end();
     } catch (erro) {
         proximo(erro);

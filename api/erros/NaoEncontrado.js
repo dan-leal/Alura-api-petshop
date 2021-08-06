@@ -1,9 +1,9 @@
 class NaoEncontrado extends Error {
-    constructor () {
-        super('Fornecedor não foi encontrado !')
-        this.name = 'NaoEncontrado'
-        this.idErro = 0
+    constructor(nome) {
+        super(`${nome} não foi encontrado !`);
+        this.name = "NaoEncontrado";
+        this.idErro = 0;
     }
 }
 
-module.exports = NaoEncontrado
+module.exports = NaoEncontrado;
