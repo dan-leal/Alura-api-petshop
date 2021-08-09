@@ -7,7 +7,10 @@ const CampoInvalido = require("../../erros/CampoInvalido");
 const DadosNaoFornecidos = require("../../erros/DadosNaoFornecidos");
 
 roteador.options("/", (req, res) => {
-    res.resultados("Access-Control-Allow-Methods", "GET", "PUT", "DELETE");
+    res.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+    res.set("Access-Control-Allow-Headers", "Content-Type");
+    res.status(204);
+    res.end();
 });
 
 roteador.get("/", async (req, res) => {
@@ -32,6 +35,13 @@ roteador.post("/", async (req, res, proximo) => {
     } catch (erro) {
         proximo(erro);
     }
+});
+
+roteador.options("/:idFornecedor", (req, res) => {
+    res.set("Access-Control-Allow-Methods", "GET, POST, PUT");
+    res.set("Access-Control-Allow-Headers", "Content-Type");
+    res.status(204);
+    res.end();
 });
 
 roteador.get("/:idFornecedor", async (req, res, proximo) => {
