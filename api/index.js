@@ -35,6 +35,9 @@ app.use((req, res, proximo) => {
 const roteador = require("./rotas/fornecedores");
 const { formatosAceitos } = require("./Serializador");
 
+const roteadorv2 = require("./rotas/fornecedores/rotas.v2");
+app.use("/api/v2/fornecedores", roteadorv2);
+
 app.use("/api/fornecedores", roteador);
 
 app.use((erro, req, res, proximo) => {
